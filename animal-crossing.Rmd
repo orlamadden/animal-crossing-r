@@ -36,3 +36,16 @@ user_reviews %>%
 
 head(user_reviews$text)
 ```
+
+```{r}
+library(tidytext)
+library(lubridate)
+
+user_reviews %>%
+  group_by(week = floor_date(date, 'week')) %>%
+  summarize(nb_reviews = n(),
+            avg_grade = mean(grade))
+
+user_reviews %>%
+  unnest_tokens(word, text)
+```
