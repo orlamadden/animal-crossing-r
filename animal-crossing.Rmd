@@ -19,8 +19,7 @@ villagers <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/
 ```
 
 ```{r}
-villagers %>%
-  View()
+
 ```
 
 ### Text Analysis
@@ -50,25 +49,37 @@ user_review_words
 ```
 
 ```{r}
-user_reviews %>%
-  group_by(week = floor_date(date, 'week')) %>%
+by_week <- user_reviews %>%
+  group_by(week = floor_date(date, "week", week_start = 1)) %>%
   summarize(nb_reviews = n(),
-            avg_grade = mean(grade)) %>%
+            avg_grade = mean(grade),
+            pct_zero = mean(grade == 0),
+            pct_ten = mean(grade == 10))
+
+by_week %>%
   ggplot(aes(week, avg_grade)) +
   geom_line() +
   geom_point(aes(size = nb_reviews)) +
   expand_limits(y = 0) +
-  labs(x = 'Time',
-       y = 'Average grade',
-       size = '# of reviews')
+  labs(x = "Time",
+       y = "Average grade",
+       size = "# of reviews")
 
 user_reviews %>%
   ggplot(aes(grade)) +
   geom_histogram() +
-  labs(title = 'Most reviews were high or very low')
-```
+  labs(title = "Most reviews were very low or very high")
 
-```{r}
-
-
+by_week %>%
+  gather(type, value, contains("pct")) %>%
+  mutate(type = ifelse(type == "pct_zero", "% rated 0", "% rated 10")) %>%
+  ggplot(aes(week, value, color = type)) +
+  geom_line() +
+  geom_point(aes(size = nb_reviews)) +
+  scale_y_continuous(labels = scales::percent) +
+  expand_limits(y = 0) +
+  labs(x = "Time",
+       y = "% of reviews",
+       size = "Total reviews in week",
+       title = "Reviews got more polarizing in middle of game")
 ```
