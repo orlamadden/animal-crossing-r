@@ -41,11 +41,34 @@ head(user_reviews$text)
 library(tidytext)
 library(lubridate)
 
+user_review_words <- user_reviews %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words, by = 'word') %>%
+  count(user_name, date, grade, word)
+
+user_review_words
+```
+
+```{r}
 user_reviews %>%
   group_by(week = floor_date(date, 'week')) %>%
   summarize(nb_reviews = n(),
-            avg_grade = mean(grade))
+            avg_grade = mean(grade)) %>%
+  ggplot(aes(week, avg_grade)) +
+  geom_line() +
+  geom_point(aes(size = nb_reviews)) +
+  expand_limits(y = 0) +
+  labs(x = 'Time',
+       y = 'Average grade',
+       size = '# of reviews')
 
 user_reviews %>%
-  unnest_tokens(word, text)
+  ggplot(aes(grade)) +
+  geom_histogram() +
+  labs(title = 'Most reviews were high or very low')
+```
+
+```{r}
+
+
 ```
